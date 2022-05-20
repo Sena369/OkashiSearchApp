@@ -23,9 +23,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         searchText.delegate = self
         searchText.placeholder = "お菓子の名前を入力してください"
     }
-
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
+        if let searchWord = searchText.text {
+            fetchURL(keyword: searchWord)
+        }
+    }
+    
+    func fetchURL(keyword: String) {
+        guard let keywordEncode = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
+        
+        guard let requestURL = URL(string: "https://sysbird.jp/toriko/api/?apikey=guest&format=json&keyword=\(keywordEncode)&max=10&order=r") else {
+            return
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -40,6 +51,5 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         return cell
     }
-
 }
 
