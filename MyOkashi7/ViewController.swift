@@ -6,8 +6,9 @@
 //
 
 import UIKit
+import SafariServices
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, SFSafariViewControllerDelegate {
 
     private var itemList: [(name: String, maker: String, link: URL, image: URL)] = []
     
@@ -46,7 +47,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             do {
                 let decoder = JSONDecoder()
                 let json = try decoder.decode(ResultJson.self, from: data!)
-                print(json)
+                
+                if let items = json.item {
+                    for item in items {
+                        if let name = item.name, let maker = item.maker,
+                           let link = item.url, let image = item.image {
+                            let okashi = (name, maker, link, image)
+                            self.itemList.append(okashi)
+                        }
+                    }
+                    self.tableView.reloadData()
+                }
             } catch {
                 print("エラーが出ました")
             }
@@ -65,6 +76,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.configure(item: itemList[indexPath.row])
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        let safariViewController = SFSafariViewController(url: itemList[indexPath.row].link)
+        safariViewController.delegate = self
+        
+        present(safariViewController, animated: true)
+    }
+    
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        dismiss(animated: true)
     }
 }
 
